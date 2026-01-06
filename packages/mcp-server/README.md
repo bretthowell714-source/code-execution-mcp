@@ -54,7 +54,7 @@ If you use Claude Code, you can install the MCP server by running the command be
 environment variables in Claude Code's `.claude.json`, which can be found in your home directory.
 
 ```
-claude mcp add --transport stdio solargystix_api --env PETSTORE_API_KEY="Your PETSTORE_API_KEY here." -- npx -y solargystix-mcp
+claude mcp add solargystix_mcp_api --env PETSTORE_API_KEY="Your PETSTORE_API_KEY here." -- npx -y solargystix-mcp
 ```
 
 ## Code Mode
