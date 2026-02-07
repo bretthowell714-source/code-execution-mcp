@@ -1,248 +1,371 @@
-# Code Execution MCP Server
+# Solargystix TypeScript API Library
 
-A Model Context Protocol (MCP) server that exposes [Agent Zero's](https://github.com/agent0ai/agent-zero) battle-tested code execution capabilities.
+[![NPM version](<https://img.shields.io/npm/v/solargystix.svg?label=npm%20(stable)>)](https://npmjs.org/package/solargystix) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/solargystix)
 
-This MCP server allows any AI agent (Claude, Cursor, Windsurf, etc.) to execute terminal commands and Python code on the host system using Agent Zero's proven implementation.
+This library provides convenient access to the Solargystix REST API from server-side TypeScript or JavaScript.
 
-## Features
+The full API of this library can be found in [api.md](api.md).
 
-- **Execute Terminal Commands**: Run shell commands with full session persistence
-- **Execute Python Code**: Run Python code via IPython with session management
-- **Multiple Sessions**: Maintain separate execution contexts
-- **Smart Output Handling**: Automatic prompt detection, timeout management, and dialog detection
-- **Cross-Platform**: Works on Linux, macOS, and Windows (experimental)
+It is generated with [Stainless](https://www.stainless.com/).
 
-## MCP Client Configuration (no installation needed)
+## MCP Server
 
-Add to your application MCP config:
+Use the Solargystix MCP Server to enable AI assistants to interact with this API, allowing them to explore endpoints, make test requests, and use documentation to help integrate this SDK into your application.
 
-- simple case using uvx
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en-US/install-mcp?name=solargystix-mcp&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInNvbGFyZ3lzdGl4LW1jcCJdLCJlbnYiOnsiUEVUU1RPUkVfQVBJX0tFWSI6Ik15IEFQSSBLZXkifX0)
+[![Install in VS Code](https://img.shields.io/badge/_-Add_to_VS_Code-blue?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCA0MCA0MCI+PHBhdGggZmlsbD0iI0VFRSIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMzAuMjM1IDM5Ljg4NGEyLjQ5MSAyLjQ5MSAwIDAgMS0xLjc4MS0uNzNMMTIuNyAyNC43OGwtMy40NiAyLjYyNC0zLjQwNiAyLjU4MmExLjY2NSAxLjY2NSAwIDAgMS0xLjA4Mi4zMzggMS42NjQgMS42NjQgMCAwIDEtMS4wNDYtLjQzMWwtMi4yLTJhMS42NjYgMS42NjYgMCAwIDEgMC0yLjQ2M0w3LjQ1OCAyMCA0LjY3IDE3LjQ1MyAxLjUwNyAxNC41N2ExLjY2NSAxLjY2NSAwIDAgMSAwLTIuNDYzbDIuMi0yYTEuNjY1IDEuNjY1IDAgMCAxIDIuMTMtLjA5N2w2Ljg2MyA1LjIwOUwyOC40NTIuODQ0YTIuNDg4IDIuNDg4IDAgMCAxIDEuODQxLS43MjljLjM1MS4wMDkuNjk5LjA5MSAxLjAxOS4yNDVsOC4yMzYgMy45NjFhMi41IDIuNSAwIDAgMSAxLjQxNSAyLjI1M3YuMDk5LS4wNDVWMzMuMzd2LS4wNDUuMDk1YTIuNTAxIDIuNTAxIDAgMCAxLTEuNDE2IDIuMjU3bC04LjIzNSAzLjk2MWEyLjQ5MiAyLjQ5MiAwIDAgMS0xLjA3Ny4yNDZabS43MTYtMjguOTQ3LTExLjk0OCA5LjA2MiAxMS45NTIgOS4wNjUtLjAwNC0xOC4xMjdaIi8+PC9zdmc+)](https://vscode.stainless.com/mcp/%7B%22name%22%3A%22solargystix-mcp%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22solargystix-mcp%22%5D%2C%22env%22%3A%7B%22PETSTORE_API_KEY%22%3A%22My%20API%20Key%22%7D%7D)
 
-```json
-{
-  "mcpServers": {
-    "code-execution": {
-      "command": "uvx",
-      "args": ["code-execution-mcp"]
-    }
+> Note: You may need to set environment variables in your MCP client.
+
+## Installation
+
+```sh
+npm install solargystix
+```
+
+## Usage
+
+The full API of this library can be found in [api.md](api.md).
+
+<!-- prettier-ignore -->
+```js
+import Solargystix from 'solargystix';
+
+const client = new Solargystix({
+  apiKey: process.env['PETSTORE_API_KEY'], // This is the default and can be omitted
+});
+
+const order = await client.store.orders.create({
+  petId: 1,
+  quantity: 1,
+  status: 'placed',
+});
+
+console.log(order.id);
+```
+
+### Request & Response types
+
+This library includes TypeScript definitions for all request params and response fields. You may import and use them like so:
+
+<!-- prettier-ignore -->
+```ts
+import Solargystix from 'solargystix';
+
+const client = new Solargystix({
+  apiKey: process.env['PETSTORE_API_KEY'], // This is the default and can be omitted
+});
+
+const response: Solargystix.StoreListInventoryResponse = await client.store.listInventory();
+```
+
+Documentation for each method, request param, and response field are available in docstrings and will appear on hover in most modern editors.
+
+## Handling errors
+
+When the library is unable to connect to the API,
+or if the API returns a non-success status code (i.e., 4xx or 5xx response),
+a subclass of `APIError` will be thrown:
+
+<!-- prettier-ignore -->
+```ts
+const response = await client.store.listInventory().catch(async (err) => {
+  if (err instanceof Solargystix.APIError) {
+    console.log(err.status); // 400
+    console.log(err.name); // BadRequestError
+    console.log(err.headers); // {server: 'nginx', ...}
+  } else {
+    throw err;
   }
-}
+});
 ```
 
-- or pipx if uvx is not installed
+Error codes are as follows:
 
-```json
-{
-  "mcpServers": {
-    "code-execution": {
-      "command": "pipx",
-      "args": ["run", "code-execution-mcp"]
-    }
-  }
-}
+| Status Code | Error Type                 |
+| ----------- | -------------------------- |
+| 400         | `BadRequestError`          |
+| 401         | `AuthenticationError`      |
+| 403         | `PermissionDeniedError`    |
+| 404         | `NotFoundError`            |
+| 422         | `UnprocessableEntityError` |
+| 429         | `RateLimitError`           |
+| >=500       | `InternalServerError`      |
+| N/A         | `APIConnectionError`       |
+
+### Retries
+
+Certain errors will be automatically retried 2 times by default, with a short exponential backoff.
+Connection errors (for example, due to a network connectivity problem), 408 Request Timeout, 409 Conflict,
+429 Rate Limit, and >=500 Internal errors will all be retried by default.
+
+You can use the `maxRetries` option to configure or disable this:
+
+<!-- prettier-ignore -->
+```js
+// Configure the default for all requests:
+const client = new Solargystix({
+  maxRetries: 0, // default is 2
+});
+
+// Or, configure per-request:
+await client.store.listInventory({
+  maxRetries: 5,
+});
 ```
 
-## Additional configuration
+### Timeouts
 
-The MCP server can be configured via environment variables:
+Requests time out after 1 minute by default. You can configure this with a `timeout` option:
 
-```bash
-# Shell executable (default: /bin/bash on Unix, powershell.exe on Windows)
-export CODE_EXEC_EXECUTABLE=/bin/bash
+<!-- prettier-ignore -->
+```ts
+// Configure the default for all requests:
+const client = new Solargystix({
+  timeout: 20 * 1000, // 20 seconds (default is 1 minute)
+});
 
-# Init commands (semicolon-separated, run when creating new sessions, empty by default)
-export CODE_EXEC_INIT_COMMANDS="source /path/to/venv/bin/activate;export PATH=\$PATH:/custom/bin"
-
-# Timeout configuration (in seconds)
-export CODE_EXEC_FIRST_OUTPUT_TIMEOUT=30      # Wait for first output
-export CODE_EXEC_BETWEEN_OUTPUT_TIMEOUT=15    # Wait between output chunks
-export CODE_EXEC_DIALOG_TIMEOUT=5             # Detect dialog prompts
-export CODE_EXEC_MAX_EXEC_TIMEOUT=180         # Maximum execution time
-
-# Log directory (default empty = logging disabled)
-export CODE_EXEC_LOG_DIR=/path/to/logs
+// Override per-request:
+await client.store.listInventory({
+  timeout: 5 * 1000,
+});
 ```
 
-### Additional examples
+On timeout, an `APIConnectionTimeoutError` is thrown.
 
-- start sessions with custom shell and python environment + logging
+Note that requests which time out will be [retried twice by default](#retries).
 
-```json
-{
-  "mcpServers": {
-    "code-execution-mcp": {
-      "command": "uvx",
-      "args": ["code-execution-mcp"],
-      "env": {
-        "CODE_EXEC_EXECUTABLE": "/bin/zsh",
-        "CODE_EXEC_INIT_COMMANDS": "source /Users/lazy/Projects/code-execution-mcp/.venv/bin/activate",
-        "CODE_EXEC_LOG_DIR": "/Users/lazy/Projects/code-execution-mcp/logs"
-      }
-    }
-  }
-}
+## Advanced Usage
+
+### Accessing raw Response data (e.g., headers)
+
+The "raw" `Response` returned by `fetch()` can be accessed through the `.asResponse()` method on the `APIPromise` type that all methods return.
+This method returns as soon as the headers for a successful response are received and does not consume the response body, so you are free to write custom parsing or streaming logic.
+
+You can also use the `.withResponse()` method to get the raw `Response` along with the parsed data.
+Unlike `.asResponse()` this method consumes the body, returning once it is parsed.
+
+<!-- prettier-ignore -->
+```ts
+const client = new Solargystix();
+
+const response = await client.store.listInventory().asResponse();
+console.log(response.headers.get('X-My-Header'));
+console.log(response.statusText); // access the underlying Response object
+
+const { data: response, response: raw } = await client.store.listInventory().withResponse();
+console.log(raw.headers.get('X-My-Header'));
+console.log(response);
 ```
 
-- override timeouts
+### Logging
 
-```json
-{
-  "mcpServers": {
-    "code-execution-mcp": {
-      "command": "uvx",
-      "args": ["code-execution-mcp"],
-      "env": {
-        "CODE_EXEC_FIRST_OUTPUT_TIMEOUT": "60",
-        "CODE_EXEC_MAX_EXEC_TIMEOUT": "300"
-      }
-    }
-  }
-}
+> [!IMPORTANT]
+> All log messages are intended for debugging only. The format and content of log messages
+> may change between releases.
+
+#### Log levels
+
+The log level can be configured in two ways:
+
+1. Via the `SOLARGYSTIX_LOG` environment variable
+2. Using the `logLevel` client option (overrides the environment variable if set)
+
+```ts
+import Solargystix from 'solargystix';
+
+const client = new Solargystix({
+  logLevel: 'debug', // Show all log messages
+});
 ```
 
-## Manual installation
+Available log levels, from most to least verbose:
 
-```bash
-# Clone or download this package, then navigate to the directory
-git clone https://github.com/agent0ai/code-execution-mcp.git
-cd </path/to>/code-execution-mcp
+- `'debug'` - Show debug messages, info, warnings, and errors
+- `'info'` - Show info messages, warnings, and errors
+- `'warn'` - Show warnings and errors (default)
+- `'error'` - Show only errors
+- `'off'` - Disable all logging
 
-# Install dependencies
-pip install -e .
+At the `'debug'` level, all HTTP requests and responses are logged, including headers and bodies.
+Some authentication-related headers are redacted, but sensitive data in request and response bodies
+may still be visible.
+
+#### Custom logger
+
+By default, this library logs to `globalThis.console`. You can also provide a custom logger.
+Most logging libraries are supported, including [pino](https://www.npmjs.com/package/pino), [winston](https://www.npmjs.com/package/winston), [bunyan](https://www.npmjs.com/package/bunyan), [consola](https://www.npmjs.com/package/consola), [signale](https://www.npmjs.com/package/signale), and [@std/log](https://jsr.io/@std/log). If your logger doesn't work, please open an issue.
+
+When providing a custom logger, the `logLevel` option still controls which messages are emitted, messages
+below the configured level will not be sent to your logger.
+
+```ts
+import Solargystix from 'solargystix';
+import pino from 'pino';
+
+const logger = pino();
+
+const client = new Solargystix({
+  logger: logger.child({ name: 'Solargystix' }),
+  logLevel: 'debug', // Send all messages to pino, allowing it to filter
+});
 ```
 
-and run with config:
+### Making custom/undocumented requests
 
-```json
-{
-  "mcpServers": {
-    "code-execution-mcp": {
-      "command": "python",
-      "args": ["</path/to/code-execution-mcp>/main.py"]
-    }
-  }
-}
+This library is typed for convenient access to the documented API. If you need to access undocumented
+endpoints, params, or response properties, the library can still be used.
+
+#### Undocumented endpoints
+
+To make requests to undocumented endpoints, you can use `client.get`, `client.post`, and other HTTP verbs.
+Options on the client, such as retries, will be respected when making these requests.
+
+```ts
+await client.post('/some/path', {
+  body: { some_prop: 'foo' },
+  query: { some_query_arg: 'bar' },
+});
 ```
 
-## Available Tools
+#### Undocumented request params
 
-### execute_terminal
+To make requests using undocumented parameters, you may use `// @ts-expect-error` on the undocumented
+parameter. This library doesn't validate at runtime that the request matches the type, so any extra values you
+send will be sent as-is.
 
-Execute a terminal command in the specified session.
-
-**Parameters:**
-
-- `command` (string, required): The shell command to execute
-- `session` (integer, optional): Session (terminal window) number (default: 0)
-
-**Output:**
-
-- (string) The accumulated terminal output from the session
-
-### execute_python
-
-Execute Python code via IPython in the specified session.
-
-**Parameters:**
-
-- `code` (string, required): The Python code to execute
-- `session` (integer, optional): Session (terminal window) number (default: 0)
-
-**Output:**
-
-- (string) The accumulated IPython output from the session
-
-### get_output
-
-Get accumulated output from a terminal session.
-
-**Parameters:**
-
-- `session` (integer, optional): Session (terminal window) number (default: 0)
-
-**Output:**
-
-- (string) The accumulated terminal output from the session
-
-### reset_terminal
-
-Reset a terminal session, closing and reopening it.
-
-**Parameters:**
-
-- `session` (integer, optional): Session (terminal window) number (default: 0)
-- `reason` (string, optional): Reason for the reset
-
-**Output:**
-
-- (string) Text confirmation for the agent
-
-## Session Management
-
-- Sessions (terminal instances) allow maintaining separate execution contexts for multitasking, persistence or context isolation
-- Each session can be used and reset individually
-- Sessions persist until reset
-- Session 0 is default
-- Any session number can be used
-
-
-## Virtual Environment Considerations
-
-**Important:** When the MCP server is launched from a virtual environment, shell sessions may NOT automatically inherit the venv activation.
-
-**Solution:** Use init commands to explicitly activate your virtual environment:
-
-```json
-{
-  "env": {
-    "CODE_EXEC_INIT_COMMANDS": "source /path/to/venv/bin/activate"
-  }
-}
+```ts
+client.store.orders.create({
+  // ...
+  // @ts-expect-error baz is not yet public
+  baz: 'undocumented option',
+});
 ```
 
-## Platform Support
+For requests with the `GET` verb, any extra params will be in the query, all other requests will send the
+extra param in the body.
 
-- **Linux**: Fully tested and supported
-- **macOS**: Fully tested and supported
-- **Windows**: Experimental support via pywinpty
-  - Some features may behave differently
+If you want to explicitly send an extra argument, you can do so with the `query`, `body`, and `headers` request
+options.
 
-## Architecture
+#### Undocumented response properties
 
-This MCP server is a **minimal wrapper** around Agent Zero's code execution tool:
+To access undocumented response properties, you may access the response object with `// @ts-expect-error` on
+the response object, or cast the response object to the requisite type. Like the request params, we do not
+validate or strip extra properties from the response from the API.
 
-- Preserves Agent Zero's battle-tested logic
-- No rewrites or reimplementations
-- Uses Agent Zero's helper modules unchanged:
-  - `tty_session.py` - TTY session management
-  - `shell_local.py` - Local shell interface
-  - `print_style.py` - Output styling and logging
-  - `strings.py` - String manipulation utilities
+### Customizing the fetch client
 
-## Security
+By default, this library expects a global `fetch` function is defined.
 
-**WARNING:** This MCP server allows full code execution on the host system. Security is the responsibility of the MCP client.
+If you want to use a different `fetch` function, you can either polyfill the global:
 
-Only use with trusted AI agents and in controlled environments.
+```ts
+import fetch from 'my-fetch';
 
-## License
+globalThis.fetch = fetch;
+```
 
-MIT License
+Or pass it to the client:
 
-This project wraps and reuses code from [Agent Zero](https://github.com/agent0ai/agent-zero) (Copyright (c) 2025 Agent Zero, s.r.o), which is licensed under the MIT License.
+```ts
+import Solargystix from 'solargystix';
+import fetch from 'my-fetch';
 
-See the LICENSE file for full license text and attribution details.
+const client = new Solargystix({ fetch });
+```
 
-## Credits
+### Fetch options
 
-**Built on Agent Zero's proven code execution implementation.**
+If you want to set custom `fetch` options without overriding the `fetch` function, you can provide a `fetchOptions` object when instantiating the client or making a request. (Request-specific options override client options.)
 
-This MCP server preserves and reuses Agent Zero's battle-tested code:
+```ts
+import Solargystix from 'solargystix';
 
-- Core execution logic from `code_execution_tool.py`
-- Helper modules: `tty_session.py`, `shell_local.py`, `print_style.py`, `strings.py`
-- All system message prompts
+const client = new Solargystix({
+  fetchOptions: {
+    // `RequestInit` options
+  },
+});
+```
 
-All credit for the robust code execution implementation goes to the [Agent Zero](https://github.com/agent0ai/agent-zero) team.
+#### Configuring proxies
 
-Uses [FastMCP](https://gofastmcp.com/) for MCP protocol handling.
+To modify proxy behavior, you can provide custom `fetchOptions` that add runtime-specific proxy
+options to requests:
+
+<img src="https://raw.githubusercontent.com/stainless-api/sdk-assets/refs/heads/main/node.svg" align="top" width="18" height="21"> **Node** <sup>[[docs](https://github.com/nodejs/undici/blob/main/docs/docs/api/ProxyAgent.md#example---proxyagent-with-fetch)]</sup>
+
+```ts
+import Solargystix from 'solargystix';
+import * as undici from 'undici';
+
+const proxyAgent = new undici.ProxyAgent('http://localhost:8888');
+const client = new Solargystix({
+  fetchOptions: {
+    dispatcher: proxyAgent,
+  },
+});
+```
+
+<img src="https://raw.githubusercontent.com/stainless-api/sdk-assets/refs/heads/main/bun.svg" align="top" width="18" height="21"> **Bun** <sup>[[docs](https://bun.sh/guides/http/proxy)]</sup>
+
+```ts
+import Solargystix from 'solargystix';
+
+const client = new Solargystix({
+  fetchOptions: {
+    proxy: 'http://localhost:8888',
+  },
+});
+```
+
+<img src="https://raw.githubusercontent.com/stainless-api/sdk-assets/refs/heads/main/deno.svg" align="top" width="18" height="21"> **Deno** <sup>[[docs](https://docs.deno.com/api/deno/~/Deno.createHttpClient)]</sup>
+
+```ts
+import Solargystix from 'npm:solargystix';
+
+const httpClient = Deno.createHttpClient({ proxy: { url: 'http://localhost:8888' } });
+const client = new Solargystix({
+  fetchOptions: {
+    client: httpClient,
+  },
+});
+```
+
+## Frequently Asked Questions
+
+## Semantic versioning
+
+This package generally follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions, though certain backwards-incompatible changes may be released as minor versions:
+
+1. Changes that only affect static types, without breaking runtime behavior.
+2. Changes to library internals which are technically public but not intended or documented for external use. _(Please open a GitHub issue to let us know if you are relying on such internals.)_
+3. Changes that we do not expect to impact the vast majority of users in practice.
+
+We take backwards-compatibility seriously and work hard to ensure you can rely on a smooth upgrade experience.
+
+We are keen for your feedback; please open an [issue](https://www.github.com/bretthowell714-source/code-execution-mcp/issues) with questions, bugs, or suggestions.
+
+## Requirements
+
+TypeScript >= 4.9 is supported.
+
+The following runtimes are supported:
+
+- Web browsers (Up-to-date Chrome, Firefox, Safari, Edge, and more)
+- Node.js 20 LTS or later ([non-EOL](https://endoflife.date/nodejs)) versions.
+- Deno v1.28.0 or higher.
+- Bun 1.0 or later.
+- Cloudflare Workers.
+- Vercel Edge Runtime.
+- Jest 28 or greater with the `"node"` environment (`"jsdom"` is not supported at this time).
+- Nitro v2.6 or greater.
+
+Note that React Native is not supported at this time.
+
+If you are interested in other runtime environments, please open or upvote an issue on GitHub.
+
+## Contributing
+
+See [the contributing documentation](./CONTRIBUTING.md).
