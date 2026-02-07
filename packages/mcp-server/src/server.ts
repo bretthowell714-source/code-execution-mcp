@@ -57,7 +57,7 @@ export const newMcpServer = async () =>
   new McpServer(
     {
       name: 'solargystix_api',
-      version: '0.0.1',
+      version: '1.0.0',
     },
     {
       instructions: await getInstructions(),
